@@ -12,6 +12,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      console.log("Успешный вход!");
       navigation.navigate('Home');
     } catch (error) {
       Alert.alert('Ошибка входа', error.message);

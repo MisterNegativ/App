@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from "react-native";
-import { ScrollView } from "react-native";
 import { RadioButton } from "react-native-paper";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
@@ -43,46 +43,44 @@ export default function RegisterScreen({ navigation }) {
 
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      
       await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`,
+        displayName: `${firstName} ${lastName}`
       });
 
-      // Сохраняем дополнительную информацию в Firestore
-      await setDoc(doc(db, "users", userCredential.user.uid), {
+      // Сохраняем тип пользователя в Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
         firstName,
         lastName,
         phone,
         email,
-        userType,
-        createdAt: new Date().toISOString(),
+        userType, // 'employee' или 'employer'
+        createdAt: new Date().toISOString()
       });
 
-      Alert.alert("Успех", "Регистрация прошла успешно", [
-        { text: "OK", onPress: () => navigation.navigate("Home") },
-      ]);
+      // Убираем Alert перед навигацией, так как сразу переходим на другой экран
+      navigation.replace(userType === 'employer' ? 'EmployerDashboard' : 'EmployeeDashboard');
+      
     } catch (error) {
-        let errorMessage = 'Ошибка регистрации';
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            errorMessage = 'Этот email уже используется';
-            break;
-          case 'auth/invalid-email':
-            errorMessage = 'Некорректный email';
-            break;
-          case 'auth/weak-password':
-            errorMessage = 'Пароль слишком слабый';
-            break;
-          default:
-            errorMessage = error.message;
-        }
-        Alert.alert('Ошибка', errorMessage);
+      let errorMessage = 'Ошибка регистрации';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'Этот email уже используется';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Некорректный email';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Пароль слишком слабый';
+          break;
+        default:
+          errorMessage = error.message;
       }
+      Alert.alert('Ошибка', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -159,7 +157,6 @@ export default function RegisterScreen({ navigation }) {
       </TouchableOpacity>
 
       {loading && <ActivityIndicator size="small" color="#0000ff" style={styles.loader} />}
-
 
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>
         <Text style={styles.linkText}>Уже есть аккаунт? Войдите</Text>

@@ -1,74 +1,43 @@
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
-import { signOut } from "firebase/auth";
-import { auth, db } from "../../firebaseConfig";
-import { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { auth, db } from '../../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/native'; // Добавляем этот импорт
 
-export default function HomeScreen() {
-    const [userData, setUserData] = useState(null);
-    const navigation = useNavigation(); // Получаем объект навигации
-  
-    useEffect(() => {
-      const fetchUserData = async () => {
-        if (auth.currentUser) {
-          const docRef = doc(db, 'users', auth.currentUser.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            setUserData(docSnap.data());
-          }
-        }
-      };
-  
-      fetchUserData();
-    }, []);
-
-    const userTypeLabel = userData?.userType === 'employer' ? 'Работодатель' : 'Сотрудник';
-
-    const handleLogout = async () => {
+export default function HomeScreen({ navigation }) {
+  useEffect(() => {
+    const checkUserAndRedirect = async () => {
       try {
-        await signOut(auth);
-        // Перенаправляем на экран входа после выхода
-        navigation.navigate('Login');
+        const user = auth.currentUser;
+        
+        if (!user) {
+          navigation.replace('Login');
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          navigation.replace(
+            userData.userType === 'employer' 
+              ? 'EmployerDashboard' 
+              : 'EmployeeDashboard'
+          );
+        } else {
+          navigation.replace('Login');
+        }
       } catch (error) {
-        console.error("Ошибка выхода:", error);
-        Alert.alert("Ошибка", "Не удалось выйти из системы");
+        console.error("Error checking user:", error);
+        navigation.replace('Login');
       }
     };
 
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Добро пожаловать!</Text>
-        <Text style={styles.userInfo}>
-          {auth.currentUser?.displayName || "Пользователь"}
-        </Text>
-        <Text style={styles.userType}>Тип аккаунта: {userTypeLabel}</Text>
-        <Button title="Выйти" onPress={handleLogout} />
-      </View>
-    );
+    checkUserAndRedirect();
+  }, []);
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
+    </View>
+  );
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  userInfo: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  userType: {
-    fontSize: 16,
-    marginBottom: 20,
-    color: "#555",
-  },
-});
