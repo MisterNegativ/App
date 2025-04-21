@@ -24,64 +24,75 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!firstName || !lastName || !phone || !email || !password) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
-      return;
-    }
+		if (!firstName || !lastName || !phone || !email || !password) {
+			Alert.alert('Ошибка', 'Пожалуйста, заполните все поля')
+			return
+		}
 
-    // Простая валидация email
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      Alert.alert("Ошибка", "Введите корректный email");
-      return;
-    }
+		// Добавьте в начало handleRegister
+		if (!/^\+?\d{10,15}$/.test(phone)) {
+			Alert.alert('Ошибка', 'Введите корректный номер телефона')
+			return
+		}
 
-    // Валидация пароля (минимум 6 символов)
-    if (password.length < 6) {
-      Alert.alert("Ошибка", "Пароль должен содержать минимум 6 символов");
-      return;
-    }
+		// Простая валидация email
+		if (!/^\S+@\S+\.\S+$/.test(email)) {
+			Alert.alert('Ошибка', 'Введите корректный email')
+			return
+		}
 
-    setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      await updateProfile(userCredential.user, {
-        displayName: `${firstName} ${lastName}`
-      });
+		// Валидация пароля (минимум 6 символов)
+		if (password.length < 6) {
+			Alert.alert('Ошибка', 'Пароль должен содержать минимум 6 символов')
+			return
+		}
 
-      // Сохраняем тип пользователя в Firestore
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        firstName,
-        lastName,
-        phone,
-        email,
-        userType, // 'employee' или 'employer'
-        createdAt: new Date().toISOString()
-      });
+		setLoading(true)
+		try {
+			const userCredential = await createUserWithEmailAndPassword(
+				auth,
+				email,
+				password
+			)
 
-      // Убираем Alert перед навигацией, так как сразу переходим на другой экран
-      navigation.replace(userType === 'employer' ? 'EmployerDashboard' : 'EmployeeDashboard');
-      
-    } catch (error) {
-      let errorMessage = 'Ошибка регистрации';
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = 'Этот email уже используется';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Некорректный email';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Пароль слишком слабый';
-          break;
-        default:
-          errorMessage = error.message;
-      }
-      Alert.alert('Ошибка', errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+			await updateProfile(userCredential.user, {
+				displayName: `${firstName} ${lastName}`,
+			})
+
+			// Сохраняем тип пользователя в Firestore
+			await setDoc(doc(db, 'users', userCredential.user.uid), {
+				firstName,
+				lastName,
+				phone,
+				email,
+				userType, // 'employee' или 'employer'
+				createdAt: new Date().toISOString(),
+			})
+
+			// Убираем Alert перед навигацией, так как сразу переходим на другой экран
+			navigation.replace(
+				userType === 'employer' ? 'EmployerDashboard' : 'EmployeeDashboard'
+			)
+		} catch (error) {
+			let errorMessage = 'Ошибка регистрации'
+			switch (error.code) {
+				case 'auth/email-already-in-use':
+					errorMessage = 'Этот email уже используется'
+					break
+				case 'auth/invalid-email':
+					errorMessage = 'Некорректный email'
+					break
+				case 'auth/weak-password':
+					errorMessage = 'Пароль слишком слабый'
+					break
+				default:
+					errorMessage = error.message
+			}
+			Alert.alert('Ошибка', errorMessage)
+		} finally {
+			setLoading(false)
+		}
+	};
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

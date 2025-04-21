@@ -1,28 +1,95 @@
 // navigation/index.js
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import HomeScreen from '../screens/HomeScreen';
-import EmployerDashboard from '../screens/EmployerDashboard';
-import EmployeeDashboard from '../screens/EmployeeDashboard';
-import CreateTaskScreen from '../screens/CreateTaskScreen';
-import TaskDetailsScreen from '../screens/TaskDetailsScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { NavigationContainer } from '@react-navigation/native'
+import { Ionicons } from '@expo/vector-icons'
+import LoginScreen from '../screens/LoginScreen'
+import RegisterScreen from '../screens/RegisterScreen'
+import HomeScreen from '../screens/HomeScreen'
+import EmployerDashboard from '../screens/EmployerDashboard'
+import EmployeeDashboard from '../screens/EmployeeDashboard'
+import CreateTaskScreen from '../screens/CreateTaskScreen'
+import TaskDetailsScreen from '../screens/TaskDetailsScreen'
+import ProfileScreen from '../screens/ProfileScreen' // Добавим экран профиля
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator()
+const Tab = createBottomTabNavigator()
+
+// Создаем Tab Navigator для Employer
+function EmployerTabs() {
+	return (
+		<Tab.Navigator
+			screenOptions={({ route }) => ({
+				tabBarIcon: ({ focused, color, size }) => {
+					let iconName
+
+					if (route.name === 'Dashboard') {
+						iconName = focused ? 'home' : 'home-outline'
+					} else if (route.name === 'Tasks') {
+						iconName = focused ? 'list' : 'list-outline'
+					} else if (route.name === 'Profile') {
+						iconName = focused ? 'person' : 'person-outline'
+					}
+
+					return <Ionicons name={iconName} size={size} color={color} />
+				},
+				tabBarActiveTintColor: 'tomato',
+				tabBarInactiveTintColor: 'gray',
+				headerShown: false,
+			})}
+		>
+			<Tab.Screen name='Dashboard' component={EmployerDashboard} />
+			<Tab.Screen name='Tasks' component={CreateTaskScreen} />
+			<Tab.Screen name='Profile' component={ProfileScreen} />
+		</Tab.Navigator>
+	)
+}
+
+// Создаем Tab Navigator для Employee
+function EmployeeTabs() {
+	return (
+		<Tab.Navigator
+			screenOptions={({ route }) => ({
+				tabBarIcon: ({ focused, color, size }) => {
+					let iconName
+
+					if (route.name === 'Dashboard') {
+						iconName = focused ? 'home' : 'home-outline'
+					} else if (route.name === 'Tasks') {
+						iconName = focused ? 'list' : 'list-outline'
+					} else if (route.name === 'Profile') {
+						iconName = focused ? 'person' : 'person-outline'
+					}
+
+					return <Ionicons name={iconName} size={size} color={color} />
+				},
+				tabBarActiveTintColor: 'tomato',
+				tabBarInactiveTintColor: 'gray',
+				headerShown: false,
+			})}
+		>
+			<Tab.Screen name='Dashboard' component={EmployeeDashboard} />
+			<Tab.Screen name='Tasks' component={TaskDetailsScreen} />
+			<Tab.Screen name='Profile' component={ProfileScreen} />
+		</Tab.Navigator>
+	)
+}
 
 export default function AppNavigation() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="EmployerDashboard" component={EmployerDashboard} />
-        <Stack.Screen name="EmployeeDashboard" component={EmployeeDashboard} />
-        <Stack.Screen name="CreateTask" component={CreateTaskScreen} />
-        <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+	return (
+		<NavigationContainer>
+			<Stack.Navigator
+				initialRouteName='Home'
+				screenOptions={{ headerShown: false }}
+			>
+				<Stack.Screen name='Home' component={HomeScreen} />
+				<Stack.Screen name='Login' component={LoginScreen} />
+				<Stack.Screen name='Register' component={RegisterScreen} />
+				<Stack.Screen name='EmployerDashboard' component={EmployerTabs} />
+				<Stack.Screen name='EmployeeDashboard' component={EmployeeTabs} />
+				<Stack.Screen name='CreateTask' component={CreateTaskScreen} />
+				<Stack.Screen name='TaskDetails' component={TaskDetailsScreen} />
+			</Stack.Navigator>
+		</NavigationContainer>
+	)
 }
