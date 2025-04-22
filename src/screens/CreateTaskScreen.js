@@ -1,15 +1,46 @@
-import React, { useState } from "react";
-import { View, TextInput, Button, Alert, ScrollView, StyleSheet } from "react-native";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { View, TextInput, Button, Alert, ScrollView, StyleSheet, TouchableOpacity, Text } from "react-native";
+import {
+	doc,
+	setDoc,
+	getDoc,
+	serverTimestamp,
+	collection,
+	query,
+	where,
+	getDocs,
+} from 'firebase/firestore'
 import { db, auth, storage } from "../../firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
+import theme from "../constants/theme"
+import { ca } from "date-fns/locale";
 
 export default function CreateTaskScreen({ navigation }) {
   const [task, setTask] = useState({ ...TaskStructure });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [showEmployeeList, setShowEmployeeList] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState(null)
+
+  useEffect(()=> {
+    const fetchEmployees = async () => {
+      try {
+        const q = query(collection(db, "users"), where("userType", "==", "employee"));
+        const querySnapshot = await getDocs(q);
+        const employeesList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setEmployees(employeesList);
+      } catch (error){
+        console.error("Ошибка загрузки сотрудников:", error)
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -23,7 +54,7 @@ export default function CreateTaskScreen({ navigation }) {
     }
   };
 
-  const uploadImage = async (uri) => {
+  const uploadImage = async (uri) => { 
     const response = await fetch(uri);
     const blob = await response.blob();
     const filename = uri.substring(uri.lastIndexOf("/") + 1);
@@ -40,66 +71,191 @@ export default function CreateTaskScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // Загружаем изображения если есть
-      let imageUrls = [];
-      for (const img of images) {
-        const url = await uploadImage(img);
-        imageUrls.push(url);
-      }
+			// 1. Получаем данные пользователя из Firestore
+			const userDocRef = doc(db, 'users', auth.currentUser.uid)
+			const userDocSnap = await getDoc(userDocRef)
 
-      const taskData = {
-        ...task,
-        startDate: serverTimestamp(),
-        deadline: serverTimestamp(), // Здесь должна быть ваша дата
-        status: TaskStatus.OPEN,
-        employerId: auth.currentUser.uid,
-        employeeId: null,
-        createdAt: serverTimestamp(),
-        images: imageUrls,
-        history: [
-          {
-            action: TaskAction.CREATED,
-            userId: auth.currentUser.uid,
-            timestamp: new Date().toISOString(), // Используем ISO строку
-          },
-        ],
-        employerPhone: auth.currentUser.phoneNumber || "Нет номера",
-      };
+			if (!userDocSnap.exists()) {
+				throw new Error('Профиль пользователя не найден')
+			}
 
-      await setDoc(doc(db, "tasks", Date.now().toString()), taskData);
-      Alert.alert("Успех", "Задача создана");
-      navigation.goBack();
-    } catch (error) {
+			const userData = userDocSnap.data()
+			const userPhone = userData.phone || 'Нет номера'
+			// Загружаем изображения если есть
+			let imageUrls = []
+			for (const img of images) {
+				const url = await uploadImage(img)
+				imageUrls.push(url)
+			}
+
+			const taskData = {
+				...task,
+				startDate: serverTimestamp(),
+				deadline: serverTimestamp(), // Здесь должна быть ваша дата
+				status: TaskStatus.OPEN,
+				employerId: auth.currentUser.uid,
+				employeeId: selectedEmployee?.id || null,
+				employeeName: selectedEmployee
+					? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
+					: null,
+				createdAt: serverTimestamp(),
+				images: imageUrls,
+				history: [
+					{
+						action: TaskAction.CREATED,
+						userId: auth.currentUser.uid,
+						timestamp: new Date().toISOString(), // Используем ISO строку
+					},
+				],
+				employerPhone: userPhone, // Используем номер из профиля пользователя
+				employerName:
+					auth.currentUser.displayName ||
+					`${userData.firstName} ${userData.lastName}`,
+			}
+
+			await setDoc(doc(db, 'tasks', Date.now().toString()), taskData)
+			Alert.alert('Успех', 'Задача создана')
+			navigation.goBack()
+		} catch (error) {
       Alert.alert("Ошибка", error.message);
     } finally {
       setLoading(false);
     }
   };
 
+
+
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, marginTop: 100 }}>
-      <TextInput
-        style={styles.input}
-        placeholder="Название задачи"
-        value={task.title}
-        onChangeText={(text) => setTask({ ...task, title: text })}
-      />
-      <TextInput
-        placeholder="Описание"
-        multiline
-        value={task.description}
-        onChangeText={(text) => setTask({ ...task, description: text })}
-      />
-      <Button title="Добавить фото" onPress={pickImage} />
-      <Button
-        title="Создать задачу"
-        onPress={handleSubmit}
-        disabled={loading}
-      />
-    </ScrollView>
-  );
+		<ScrollView contentContainerStyle={{ padding: 20, marginTop: 100 }}>
+			<TextInput
+				style={styles.input}
+				placeholder='Название задачи'
+				value={task.title}
+				onChangeText={text => setTask({ ...task, title: text })}
+			/>
+			<TextInput
+				placeholder='Описание'
+				multiline
+				value={task.description}
+				onChangeText={text => setTask({ ...task, description: text })}
+			/>
+			<TouchableOpacity
+				style={styles.employeeSelector}
+				onPress={() => setShowEmployeeList(!showEmployeeList)}
+			>
+				<Text>
+					{selectedEmployee
+						? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
+						: 'Выберите сотрудника'}
+				</Text>
+			</TouchableOpacity>
+			{showEmployeeList && (
+				<View style={styles.employeeList}>
+					{employees.map(employee => (
+						<TouchableOpacity
+							key={employee.id}
+							style={styles.employeeItem}
+							onPress={() => {
+								setSelectedEmployee(employee)
+								setShowEmployeeList(false)
+							}}
+						>
+							<Text>{`${employee.firstName} ${employee.lastName}`}</Text>
+						</TouchableOpacity>
+					))}
+				</View>
+			)}
+			<Button title='Добавить фото' onPress={pickImage} />
+			<Button
+				title='Создать задачу'
+				onPress={handleSubmit}
+				disabled={loading}
+			/>
+		</ScrollView>
+	)
 }
 
 const styles = StyleSheet.create({
-
-});
+	container: {
+	  flex: 1,
+	  padding: theme.spacing.md,
+	  backgroundColor: theme.colors.background,
+	},
+	scrollContainer: {
+	  paddingBottom: theme.spacing.xl,
+	},
+	input: {
+	  height: 50,
+	  borderColor: theme.colors.gray,
+	  borderWidth: 1,
+	  borderRadius: theme.radius.md,
+	  paddingHorizontal: theme.spacing.md,
+	  marginBottom: theme.spacing.md,
+	  backgroundColor: theme.colors.white,
+	  fontSize: theme.text.body.fontSize,
+	},
+	descriptionInput: {
+	  height: 120,
+	  textAlignVertical: 'top',
+	  paddingTop: theme.spacing.sm,
+	},
+	employeeSelector: {
+	  borderWidth: 1,
+	  borderColor: theme.colors.gray,
+	  borderRadius: theme.radius.md,
+	  padding: theme.spacing.md,
+	  marginBottom: theme.spacing.md,
+	  backgroundColor: theme.colors.white,
+	},
+	employeeList: {
+	  marginBottom: theme.spacing.md,
+	  borderWidth: 1,
+	  borderColor: theme.colors.lightGray,
+	  borderRadius: theme.radius.md,
+	  maxHeight: 200,
+	},
+	employeeItem: {
+	  padding: theme.spacing.md,
+	  borderBottomWidth: 1,
+	  borderBottomColor: theme.colors.lightGray,
+	},
+	imagePreview: {
+	  flexDirection: 'row',
+	  flexWrap: 'wrap',
+	  marginBottom: theme.spacing.md,
+	},
+	imageContainer: {
+	  width: 100,
+	  height: 100,
+	  marginRight: theme.spacing.sm,
+	  marginBottom: theme.spacing.sm,
+	  borderRadius: theme.radius.sm,
+	  overflow: 'hidden',
+	},
+	image: {
+	  width: '100%',
+	  height: '100%',
+	},
+	button: {
+	  backgroundColor: theme.colors.primary,
+	  padding: theme.spacing.md,
+	  borderRadius: theme.radius.md,
+	  alignItems: 'center',
+	  marginBottom: theme.spacing.sm,
+	},
+	buttonText: {
+	  color: theme.colors.white,
+	  fontWeight: 'bold',
+	},
+	removeImageButton: {
+	  position: 'absolute',
+	  top: 5,
+	  right: 5,
+	  backgroundColor: theme.colors.danger,
+	  width: 24,
+	  height: 24,
+	  borderRadius: 12,
+	  justifyContent: 'center',
+	  alignItems: 'center',
+	},
+  });
