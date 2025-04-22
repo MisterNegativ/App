@@ -14,7 +14,10 @@ import { db, auth, storage } from "../../firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
+<<<<<<< HEAD
 import theme from "../constants/theme"
+=======
+>>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 import { ca } from "date-fns/locale";
 
 export default function CreateTaskScreen({ navigation }) {
@@ -177,6 +180,7 @@ export default function CreateTaskScreen({ navigation }) {
 
 const styles = StyleSheet.create({
 	container: {
+<<<<<<< HEAD
 	  flex: 1,
 	  padding: theme.spacing.md,
 	  backgroundColor: theme.colors.background,
@@ -259,3 +263,50 @@ const styles = StyleSheet.create({
 	  alignItems: 'center',
 	},
   });
+=======
+		padding: 20,
+		marginTop: 20,
+	},
+	input: {
+		borderWidth: 1,
+		borderColor: '#ccc',
+		borderRadius: 5,
+		padding: 10,
+		marginBottom: 15,
+	},
+	employeeSelector: {
+		borderWidth: 1,
+		borderColor: '#ccc',
+		borderRadius: 5,
+		padding: 15,
+		marginBottom: 15,
+	},
+	employeeList: {
+		marginBottom: 15,
+		borderWidth: 1,
+		borderColor: '#eee',
+		borderRadius: 5,
+	},
+	employeeItem: {
+		padding: 15,
+		borderBottomWidth: 1,
+		borderBottomColor: '#eee',
+	},
+	imagePreview: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		marginBottom: 15,
+	},
+	imageContainer: {
+		width: 100,
+		height: 100,
+		marginRight: 10,
+		marginBottom: 10,
+	},
+	image: {
+		width: '100%',
+		height: '100%',
+		resizeMode: 'cover',
+	},
+})
+>>>>>>> 403e663c603ae6aee4328f4a485921d838261833

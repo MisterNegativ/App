@@ -73,6 +73,7 @@ export default function TaskDetailsScreen({ route, navigation }) {
 		}
 	}
 
+<<<<<<< HEAD
 	const openChat = () => {
 		navigation.navigate('TaskChat', { 
 		  taskId: task.id,
@@ -84,6 +85,8 @@ export default function TaskDetailsScreen({ route, navigation }) {
 		});
 	  };
 
+=======
+>>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 	const updateStatus = async newStatus => {
 		try {
 			let imageUrl = null
@@ -213,12 +216,20 @@ export default function TaskDetailsScreen({ route, navigation }) {
 				</View>
 			)}
 
+<<<<<<< HEAD
 			
 			<TouchableOpacity
 				style={styles.chatButton}
 				onPress={openChat}
 			>
 				<Text style={styles.chatButtonText}>💬 Чат</Text>
+=======
+			<TouchableOpacity
+				style={styles.chatButton}
+				onPress={() => navigation.navigate('TaskChat', { taskId })}
+			>
+				<Text style={styles.chatButtonText}>Чат</Text>
+>>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 			</TouchableOpacity>
 		</View>
 	)
