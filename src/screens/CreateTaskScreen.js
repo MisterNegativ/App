@@ -14,10 +14,7 @@ import { db, auth, storage } from "../../firebaseConfig";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
-<<<<<<< HEAD
 import theme from "../constants/theme"
-=======
->>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 import { ca } from "date-fns/locale";
 
 export default function CreateTaskScreen({ navigation }) {
@@ -180,7 +177,6 @@ export default function CreateTaskScreen({ navigation }) {
 
 const styles = StyleSheet.create({
 	container: {
-<<<<<<< HEAD
 	  flex: 1,
 	  padding: theme.spacing.md,
 	  backgroundColor: theme.colors.background,
@@ -262,11 +258,6 @@ const styles = StyleSheet.create({
 	  justifyContent: 'center',
 	  alignItems: 'center',
 	},
-  });
-=======
-		padding: 20,
-		marginTop: 20,
-	},
 	input: {
 		borderWidth: 1,
 		borderColor: '#ccc',
@@ -308,5 +299,5 @@ const styles = StyleSheet.create({
 		height: '100%',
 		resizeMode: 'cover',
 	},
-})
->>>>>>> 403e663c603ae6aee4328f4a485921d838261833
+
+});

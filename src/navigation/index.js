@@ -10,16 +10,12 @@ import EmployerDashboard from '../screens/EmployerDashboard'
 import EmployeeDashboard from '../screens/EmployeeDashboard'
 import CreateTaskScreen from '../screens/CreateTaskScreen'
 import TaskDetailsScreen from '../screens/TaskDetailsScreen'
-<<<<<<< HEAD
 import ProfileScreen from '../screens/ProfileScreen' 
 import TaskChatScreen from '../screens/TaskChatScreen'
 import { colors, navStyles, typography } from '../styles';
 
 
-=======
-import ProfileScreen from '../screens/ProfileScreen' // Добавим экран профиля
 
->>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 
@@ -88,7 +84,6 @@ export default function AppNavigation() {
 		<NavigationContainer>
 			<Stack.Navigator
 				initialRouteName='Home'
-<<<<<<< HEAD
 				screenOptions={{
 					headerShown: false,
 					headerStyle: navStyles.header,
@@ -97,9 +92,6 @@ export default function AppNavigation() {
 					headerBackTitleVisible: false,
 					contentStyle: { backgroundColor: colors.white },
 				  }}
-=======
-				screenOptions={{ headerShown: false }}
->>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 			>
 				<Stack.Screen name='Home' component={HomeScreen} />
 				<Stack.Screen name='Login' component={LoginScreen} />
@@ -108,11 +100,8 @@ export default function AppNavigation() {
 				<Stack.Screen name='EmployeeDashboard' component={EmployeeTabs} />
 				<Stack.Screen name='CreateTask' component={CreateTaskScreen} />
 				<Stack.Screen name='TaskDetails' component={TaskDetailsScreen} />
-<<<<<<< HEAD
 				{/* <Stack.Screen name="Chat" component={ChatScreen} options={({ route }) => ({ title: route.params.recipientName || 'Чат',headerShown: true })}/> */}
 				<Stack.Screen name="TaskChat" component={TaskChatScreen}options={({ route }) => ({ title: `Чат по задаче #${route.params.taskId.substring(0, 6)}`,headerShown: true})}/>
-=======
->>>>>>> 403e663c603ae6aee4328f4a485921d838261833
 			</Stack.Navigator>
 		</NavigationContainer>
 	)
