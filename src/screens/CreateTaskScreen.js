@@ -15,7 +15,9 @@ import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
 import theme from "../constants/theme"
+import { Timestamp } from 'firebase/firestore'
 import { ca } from "date-fns/locale";
+import DateTimePickerModal from 'react-native-modal-datetime-picker'
 
 export default function CreateTaskScreen({ navigation }) {
   const [task, setTask] = useState({ ...TaskStructure });
@@ -24,6 +26,19 @@ export default function CreateTaskScreen({ navigation }) {
   const [employees, setEmployees] = useState([]);
   const [showEmployeeList, setShowEmployeeList] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState(null)
+  const [deadline, setDeadline] = useState(new Date())
+
+	const [isDatePickerVisible, setDatePickerVisibility] = useState(false)
+
+	const showDatePicker = () => setDatePickerVisibility(true)
+	const hideDatePicker = () => setDatePickerVisibility(false)
+
+	const handleConfirm = date => {
+		setDeadline(date) // deadline — твоя дата задачи
+		hideDatePicker()
+	}
+
+
 
   useEffect(()=> {
     const fetchEmployees = async () => {
@@ -91,7 +106,7 @@ export default function CreateTaskScreen({ navigation }) {
 			const taskData = {
 				...task,
 				startDate: serverTimestamp(),
-				deadline: serverTimestamp(), // Здесь должна быть ваша дата
+				deadline: Timestamp.fromDate(deadline),
 				status: TaskStatus.OPEN,
 				employerId: auth.currentUser.uid,
 				employeeId: selectedEmployee?.id || null,
@@ -165,6 +180,18 @@ export default function CreateTaskScreen({ navigation }) {
 					))}
 				</View>
 			)}
+			<TouchableOpacity onPress={showDatePicker}>
+				<Text>Выбрать дедлайн: {deadline.toLocaleString()}</Text>
+			</TouchableOpacity>
+
+			<DateTimePickerModal
+				isVisible={isDatePickerVisible}
+				mode='datetime'
+				onConfirm={handleConfirm}
+				onCancel={hideDatePicker}
+				themeVariant='light'
+			/>
+
 			<Button title='Добавить фото' onPress={pickImage} />
 			<Button
 				title='Создать задачу'
