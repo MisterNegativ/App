@@ -59,8 +59,6 @@ function EmployeeTabs() {
 
 					if (route.name === 'Dashboard') {
 						iconName = focused ? 'home' : 'home-outline'
-					} else if (route.name === 'Tasks') {
-						iconName = focused ? 'list' : 'list-outline'
 					} else if (route.name === 'Profile') {
 						iconName = focused ? 'person' : 'person-outline'
 					}
@@ -73,7 +71,6 @@ function EmployeeTabs() {
 			})}
 		>
 			<Tab.Screen name='Dashboard' component={EmployeeDashboard} />
-			<Tab.Screen name='Tasks' component={TaskDetailsScreen} />
 			<Tab.Screen name='Profile' component={ProfileScreen} />
 		</Tab.Navigator>
 	)
