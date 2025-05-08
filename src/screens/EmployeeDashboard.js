@@ -23,6 +23,23 @@ const statusLabels = {
 	completed: 'Завершено', // ← добавлено
 }
 
+const getBorderColorByDeadline = deadline => {
+	if (!deadline) return '#007AFF' // стандартный цвет
+
+	const now = new Date()
+	const diffMs = deadline.toDate() - now
+	const diffHours = diffMs / (1000 * 60 * 60)
+
+	if (diffHours <= 1) {
+		return '#d32f2f' // красный, если меньше часа
+	} else if (diffHours <= 24) {
+		return '#ff8f00' // оранжевый, если меньше суток
+	} else {
+		return '#007AFF' // синий по умолчанию
+	}
+}
+
+
 const statuses = [
 	{ value: 'Все', label: 'Все', icon: 'apps' },
 	{ value: 'open', label: 'Открыта', icon: 'folder-open-outline' },
@@ -109,7 +126,10 @@ const q = query(
 				ListEmptyComponent={<Text>Задачи не найдены</Text>}
 				renderItem={({ item }) => (
 					<TouchableOpacity
-						style={styles.taskCard}
+						style={[
+							styles.taskCard,
+							{ borderLeftColor: getBorderColorByDeadline(item.deadline) },
+						]}
 						onPress={() =>
 							navigation.navigate('TaskDetails', { taskId: item.id })
 						}
@@ -117,6 +137,7 @@ const q = query(
 						<Text style={styles.taskTitle}>{item.title}</Text>
 						<Text>Статус: {statusLabels[item.status]}</Text>
 						<Text>От: {item.employerPhone}</Text>
+						<Text>Дедлайн: {item.createdAt.toDate().toLocaleString()}</Text>
 					</TouchableOpacity>
 				)}
 				keyExtractor={item => item.id}
@@ -140,7 +161,6 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		elevation: 3,
 		borderLeftWidth: 5,
-		borderLeftColor: '#007AFF',
 	},
 
 	taskTitle: {

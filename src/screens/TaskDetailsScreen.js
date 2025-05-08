@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { TaskStatus, TaskAction } from '../../models';
 
+
 export default function TaskDetailsScreen({ route, navigation }) {
   const { taskId } = route.params;
   const [task, setTask] = useState(null);
@@ -205,6 +206,15 @@ export default function TaskDetailsScreen({ route, navigation }) {
 						{task.employerPhone || 'Не указан'}
 					</Text>
 				</View>
+
+				{task?.deadline && (
+					<View style={styles.detailRow}>
+						<Text style={styles.detailLabel}>Дедлайн:</Text>
+						<Text style={styles.detailValue}>
+							 {format(task.deadline.toDate(), 'dd MMMM yyyy, HH:mm')}
+						</Text>
+					</View>
+				)}
 
 				{task.description && (
 					<View style={styles.descriptionContainer}>
@@ -401,27 +411,6 @@ const styles = StyleSheet.create({
 	},
 	actions: {
 		marginBottom: 20,
-	},
-	photoButton: {
-		backgroundColor: '#4caf50',
-		padding: 15,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginBottom: 10,
-	},
-	problemButton: {
-		backgroundColor: '#f44336',
-		padding: 15,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginBottom: 10,
-	},
-	completeButton: {
-		backgroundColor: '#2196f3',
-		padding: 15,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginBottom: 10,
 	},
 	disabledButton: {
 		opacity: 0.6,

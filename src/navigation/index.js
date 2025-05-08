@@ -13,6 +13,8 @@ import TaskDetailsScreen from '../screens/TaskDetailsScreen'
 import ProfileScreen from '../screens/ProfileScreen' 
 import TaskChatScreen from '../screens/TaskChatScreen'
 import { colors, navStyles, typography } from '../styles';
+import StatisticsScreen from '../screens/StatisticsScreen'
+import EmployeeProfileScreen from '../screens/EmployeeProfileScreen'
 
 
 
@@ -33,6 +35,8 @@ function EmployerTabs() {
 						iconName = focused ? 'list' : 'list-outline'
 					} else if (route.name === 'Profile') {
 						iconName = focused ? 'person' : 'person-outline'
+					} else if (route.name === 'Statistics') {
+						iconName = focused ? 'bar-chart' : 'bar-chart-outline'
 					}
 
 					return <Ionicons name={iconName} size={size} color={color} />
@@ -44,10 +48,12 @@ function EmployerTabs() {
 		>
 			<Tab.Screen name='Dashboard' component={EmployerDashboard} />
 			<Tab.Screen name='Tasks' component={CreateTaskScreen} />
+			<Tab.Screen name='Statistics' component={StatisticsScreen} />
 			<Tab.Screen name='Profile' component={ProfileScreen} />
 		</Tab.Navigator>
 	)
 }
+
 
 // Создаем Tab Navigator для Employee
 function EmployeeTabs() {
@@ -71,7 +77,7 @@ function EmployeeTabs() {
 			})}
 		>
 			<Tab.Screen name='Dashboard' component={EmployeeDashboard} />
-			<Tab.Screen name='Profile' component={ProfileScreen} />
+			<Tab.Screen name='Profile' component={EmployeeProfileScreen} />
 		</Tab.Navigator>
 	)
 }

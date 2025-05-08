@@ -78,6 +78,35 @@ export default function CreateTaskScreen({ navigation }) {
     return await getDownloadURL(storageRef);
   };
 
+  const scheduleDeadlineNotification = async (deadline, title) => {
+		const now = new Date()
+		const deadlineDate = new Date(deadline)
+
+		const oneHourBefore = new Date(deadlineDate.getTime() - 60 * 60 * 1000) // 1 час
+		const oneDayBefore = new Date(deadlineDate.getTime() - 24 * 60 * 60 * 1000) // 1 день
+
+		if (oneDayBefore > now) {
+			await Notifications.scheduleNotificationAsync({
+				content: {
+					title: 'Напоминание!',
+					body: `Завтра дедлайн задачи: ${title}`,
+				},
+				trigger: oneDayBefore,
+			})
+		}
+
+		if (oneHourBefore > now) {
+			await Notifications.scheduleNotificationAsync({
+				content: {
+					title: 'Скоро дедлайн!',
+					body: `Через 1 час задача "${title}" должна быть выполнена`,
+				},
+				trigger: oneHourBefore,
+			})
+		}
+	}
+
+
   const handleSubmit = async () => {
     if (!task.title || !task.description) {
       Alert.alert("Ошибка", "Заполните название и описание");
@@ -129,6 +158,7 @@ export default function CreateTaskScreen({ navigation }) {
 			}
 
 			await setDoc(doc(db, 'tasks', Date.now().toString()), taskData)
+			await scheduleDeadlineNotification(deadline, task.title)
 			Alert.alert('Успех', 'Задача создана')
 			navigation.goBack()
 		} catch (error) {
