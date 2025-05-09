@@ -77,7 +77,7 @@ function EmployeeTabs() {
 			})}
 		>
 			<Tab.Screen name='Dashboard' component={EmployeeDashboard} />
-			<Tab.Screen name='Profile' component={EmployeeProfileScreen} />
+			<Tab.Screen name='Profile' component={ProfileScreen} />
 		</Tab.Navigator>
 	)
 }

@@ -31,6 +31,7 @@ export default function TaskDetailsScreen({ route, navigation }) {
   const [task, setTask] = useState(null);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [ratingSubmitting, setRatingSubmitting] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, 'tasks', taskId), doc => {
@@ -47,6 +48,32 @@ export default function TaskDetailsScreen({ route, navigation }) {
     });
     return unsubscribe;
   }, [taskId]);
+
+const rateTask = async value => {
+	try {
+		setRatingSubmitting(true)
+
+		const historyEntry = {
+			action: 'RATED',
+			userId: auth.currentUser.uid,
+			value,
+			timestamp: new Date().toISOString(), // заменили serverTimestamp()
+		}
+
+		await updateDoc(doc(db, 'tasks', taskId), {
+			rating: value,
+			history: arrayUnion(historyEntry),
+		})
+
+		Alert.alert('Спасибо!', `Вы поставили оценку: ${value} ⭐`)
+	} catch (error) {
+		console.error('Ошибка при оценке:', error)
+		Alert.alert('Ошибка', 'Не удалось сохранить оценку')
+	} finally {
+		setRatingSubmitting(false)
+	}
+}
+
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -103,46 +130,53 @@ export default function TaskDetailsScreen({ route, navigation }) {
   };
 
   const updateStatus = async newStatus => {
-    try {
-      let imageUrl = null;
+		try {
+			let imageUrl = null
 
-      if (newStatus === TaskStatus.COMPLETED) {
-        if (!image) {
-          Alert.alert('Требуется фото', 'Сделайте фото выполненной работы');
-          return;
-        }
+			if (newStatus === TaskStatus.COMPLETED) {
+				if (!image) {
+					Alert.alert('Требуется фото', 'Сделайте фото выполненной работы')
+					return
+				}
 
-        imageUrl = await uploadImage();
-        if (!imageUrl) return;
-      }
+				imageUrl = await uploadImage()
+				if (!imageUrl) return
+			}
 
-      const updateData = {
-        status: newStatus,
-        history: arrayUnion({
-          action: TaskAction.STATUS_CHANGED,
-          status: newStatus,
-          userId: auth.currentUser.uid,
-          timestamp: serverTimestamp(),
-          ...(imageUrl && { proofImage: imageUrl }),
-        }),
-      };
+			// Создаём историю вручную с ISO-датой вместо serverTimestamp()
+			const historyEntry = {
+				action: TaskAction.STATUS_CHANGED,
+				status: newStatus,
+				userId: auth.currentUser.uid,
+				timestamp: new Date().toISOString(),
+			}
 
-      if (newStatus === TaskStatus.COMPLETED) {
-        updateData.completedAt = serverTimestamp();
-        updateData.employeeProof = imageUrl;
-      }
+			if (imageUrl) {
+				historyEntry.proofImage = imageUrl
+			}
 
-      await updateDoc(doc(db, 'tasks', taskId), updateData);
+			const updateData = {
+				status: newStatus,
+				history: arrayUnion(historyEntry),
+			}
 
-      if (newStatus === TaskStatus.COMPLETED) {
-        Alert.alert('Успех', 'Задача завершена');
-        setImage(null);
-      }
-    } catch (error) {
-      console.error('Update error:', error);
-      Alert.alert('Ошибка', error.message);
-    }
-  };
+			if (newStatus === TaskStatus.COMPLETED) {
+				updateData.completedAt = serverTimestamp() // корректное использование
+				updateData.employeeProof = imageUrl
+			}
+
+			await updateDoc(doc(db, 'tasks', taskId), updateData)
+
+			if (newStatus === TaskStatus.COMPLETED) {
+				Alert.alert('Успех', 'Задача завершена')
+				setImage(null)
+			}
+		} catch (error) {
+			console.error('Update error:', error)
+			Alert.alert('Ошибка', error.message)
+		}
+	}
+
 
   const getStatusText = status => {
     switch (status) {
@@ -211,7 +245,7 @@ export default function TaskDetailsScreen({ route, navigation }) {
 					<View style={styles.detailRow}>
 						<Text style={styles.detailLabel}>Дедлайн:</Text>
 						<Text style={styles.detailValue}>
-							 {format(task.deadline.toDate(), 'dd MMMM yyyy, HH:mm')}
+							{format(task.deadline.toDate(), 'dd MMMM yyyy, HH:mm')}
 						</Text>
 					</View>
 				)}
@@ -231,6 +265,28 @@ export default function TaskDetailsScreen({ route, navigation }) {
 				</View>
 			)}
 
+			{auth.currentUser?.uid === task.employerId &&
+				task.status === 'completed' &&
+				task.rating == null && (
+					<View style={styles.ratingContainer}>
+						<Text style={styles.proofLabel}>
+							Поставьте оценку выполненной работе:
+						</Text>
+						<View style={styles.ratingButtons}>
+							{[1, 2, 3, 4, 5].map(star => (
+								<TouchableOpacity
+									key={star}
+									onPress={() => rateTask(star)}
+									disabled={ratingSubmitting}
+									style={styles.starButton}
+								>
+									<Text style={styles.starText}>⭐ {star}</Text>
+								</TouchableOpacity>
+							))}
+						</View>
+					</View>
+				)}
+
 			{image && (
 				<View style={styles.imageContainer}>
 					<Text style={styles.proofLabel}>Новое фото:</Text>
@@ -243,7 +299,7 @@ export default function TaskDetailsScreen({ route, navigation }) {
 				</View>
 			)}
 
-			{auth.currentUser?.uid === task.employeeId && (
+			{(auth.currentUser?.uid === task.employeeId && task.status != TaskStatus.COMPLETED) && (
 				<View style={styles.actions}>
 					{task.status !== TaskStatus.BLOCKED && (
 						<TouchableOpacity style={styles.button}>
@@ -442,5 +498,32 @@ const styles = StyleSheet.create({
 		fontSize: 14, // чуть меньше
 		fontWeight: '600',
 		marginLeft: 6,
+	},
+	ratingContainer: {
+		backgroundColor: '#fff',
+		padding: 16,
+		borderRadius: 8,
+		marginBottom: 20,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 2,
+		elevation: 2,
+	},
+	ratingButtons: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		marginTop: 10,
+	},
+	starButton: {
+		backgroundColor: '#FFD700',
+		padding: 10,
+		borderRadius: 8,
+		minWidth: 50,
+		alignItems: 'center',
+	},
+	starText: {
+		fontSize: 16,
+		fontWeight: 'bold',
 	},
 })

@@ -43,8 +43,7 @@ if (task.status === 'completed' && task.employeeId) {
 	const name = task.employeeName || 'Неизвестный'
 	stats[name] = (stats[name] || 0) + 1
 
-	const completedDate =
-		task.reviewedAt?.toDate?.() || task.updatedAt?.toDate?.()
+	const completedDate = task.completedAt?.toDate?.()
 	const deadline = task.deadline?.toDate?.()
 
 	if (completedDate && deadline && completedDate > deadline) {

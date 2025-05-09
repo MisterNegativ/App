@@ -10,69 +10,71 @@ import {
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db, auth } from '../../firebaseConfig'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { TaskStatus } from '../../models'
 
 export default function EmployeeDashboard({ navigation }) {
 	const [tasks, setTasks] = useState([])
 	const [filteredTasks, setFilteredTasks] = useState([])
 	const [selectedStatus, setSelectedStatus] = useState('Все')
 
-const statusLabels = {
-	open: 'Открыта',
-	in_progress: 'В работе',
-	blocked: 'Проблема',
-	completed: 'Завершено', // ← добавлено
-}
-
-const getBorderColorByDeadline = deadline => {
-	if (!deadline) return '#007AFF' // стандартный цвет
-
-	const now = new Date()
-	const diffMs = deadline.toDate() - now
-	const diffHours = diffMs / (1000 * 60 * 60)
-
-	if (diffHours <= 1) {
-		return '#d32f2f' // красный, если меньше часа
-	} else if (diffHours <= 24) {
-		return '#ff8f00' // оранжевый, если меньше суток
-	} else {
-		return '#007AFF' // синий по умолчанию
+	const statusLabels = {
+		open: 'Открыта',
+		in_progress: 'В работе',
+		blocked: 'Проблема',
+		completed: 'Завершено', // ← добавлено
 	}
-}
 
+	// Передаём теперь и статус
+	const getBorderColorByDeadline = (deadline, status) => {
+		// Если задача завершена — сразу зелёный
+		if (status === TaskStatus.COMPLETED) {
+			return '#388E3C' // зелёный
+		}
 
-const statuses = [
-	{ value: 'Все', label: 'Все', icon: 'apps' },
-	{ value: 'open', label: 'Открыта', icon: 'folder-open-outline' },
-	{ value: 'in_progress', label: 'В работе', icon: 'time-outline' },
-	{ value: 'blocked', label: 'Проблема', icon: 'alert-circle-outline' },
-	{ value: 'completed', label: 'Завершено', icon: 'checkmark-done-outline' }, // ← добавлено
-]
+		if (!deadline) return '#007AFF' // синий по умолчанию
 
+		const now = new Date()
+		const diffMs = deadline.toDate() - now
+		const diffHours = diffMs / (1000 * 60 * 60)
 
+		if (diffHours <= 1) {
+			return '#D32F2F' // красный
+		} else if (diffHours <= 24) {
+			return '#FF8F00' // оранжевый
+		} else {
+			return '#007AFF' // синий
+		}
+	}
 
-useEffect(() => {
-	const user = auth.currentUser
-	if (!user) return
+	const statuses = [
+		{ value: 'Все', label: 'Все', icon: 'apps' },
+		{ value: 'open', label: 'Открыта', icon: 'folder-open-outline' },
+		{ value: 'in_progress', label: 'В работе', icon: 'time-outline' },
+		{ value: 'blocked', label: 'Проблема', icon: 'alert-circle-outline' },
+		{ value: 'completed', label: 'Завершено', icon: 'checkmark-done-outline' }, // ← добавлено
+	]
 
-const q = query(
-	collection(db, 'tasks'),
-	where('status', 'in', ['open', 'in_progress', 'blocked', 'completed']),
-	where('employeeId', '==', user.uid)
-)
+	useEffect(() => {
+		const user = auth.currentUser
+		if (!user) return
 
+		const q = query(
+			collection(db, 'tasks'),
+			where('status', 'in', ['open', 'in_progress', 'blocked', 'completed']),
+			where('employeeId', '==', user.uid)
+		)
 
-	const unsubscribe = onSnapshot(q, snapshot => {
-		const tasksData = snapshot.docs.map(doc => ({
-			id: doc.id,
-			...doc.data(),
-		}))
-		setTasks(tasksData)
-		setFilteredTasks(tasksData)
-	})
+		const unsubscribe = onSnapshot(q, snapshot => {
+			const tasksData = snapshot.docs.map(doc => ({
+				id: doc.id,
+				...doc.data(),
+			}))
+			setTasks(tasksData)
+			setFilteredTasks(tasksData)
+		})
 
-	return unsubscribe
-}, [])
-
+		return unsubscribe
+	}, [])
 
 	useEffect(() => {
 		if (selectedStatus === 'Все') {
@@ -125,19 +127,42 @@ const q = query(
 				data={filteredTasks}
 				ListEmptyComponent={<Text>Задачи не найдены</Text>}
 				renderItem={({ item }) => (
+					// Внутри renderItem:
 					<TouchableOpacity
 						style={[
 							styles.taskCard,
-							{ borderLeftColor: getBorderColorByDeadline(item.deadline) },
+							{ borderLeftColor: getBorderColorByDeadline(item.deadline, item.status) },
 						]}
 						onPress={() =>
 							navigation.navigate('TaskDetails', { taskId: item.id })
 						}
 					>
-						<Text style={styles.taskTitle}>{item.title}</Text>
-						<Text>Статус: {statusLabels[item.status]}</Text>
-						<Text>От: {item.employerPhone}</Text>
-						<Text>Дедлайн: {item.createdAt.toDate().toLocaleString()}</Text>
+						{/* Верхняя линия: заголовок и оценка справа */}
+						<View style={styles.cardHeader}>
+							<Text style={styles.taskTitle}>{item.title}</Text>
+							{item.rating != null && (
+								<View style={styles.ratingBadge}>
+									<Ionicons name='star' size={16} color='#FFD700' />
+									<Text style={styles.ratingText}>{item.rating}</Text>
+								</View>
+							)}
+						</View>
+
+						{/* Строка с иконками */}
+						<View style={styles.taskInfoRow}>
+							<Ionicons name='clipboard-outline' size={16} color='#555' />
+							<Text style={styles.taskText}>{statusLabels[item.status]}</Text>
+						</View>
+						<View style={styles.taskInfoRow}>
+							<Ionicons name='call-outline' size={16} color='#555' />
+							<Text style={styles.taskText}>{item.employerPhone}</Text>
+						</View>
+						<View style={styles.taskInfoRow}>
+							<Ionicons name='time-outline' size={16} color='#555' />
+							<Text style={styles.taskText}>
+								{item.deadline.toDate().toLocaleString()}
+							</Text>
+						</View>
 					</TouchableOpacity>
 				)}
 				keyExtractor={item => item.id}
@@ -162,18 +187,44 @@ const styles = StyleSheet.create({
 		elevation: 3,
 		borderLeftWidth: 5,
 	},
-
+	cardHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginBottom: 8,
+	},
 	taskTitle: {
 		fontSize: 16,
-		fontWeight: '600',
-		marginBottom: 6,
+		fontWeight: '800',
 		color: '#333',
+		flex: 1,
+		marginRight: 8,
+	},
+	ratingBadge: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#FFF9E6',
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 12,
+	},
+	ratingText: {
+		marginLeft: 4,
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#555',
+	},
+	taskInfoRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 4,
 	},
 	taskText: {
 		fontSize: 14,
 		color: '#555',
-		marginBottom: 2,
+		marginLeft: 6,
 	},
+
 	filterContainer: { flexDirection: 'row', marginBottom: 20 },
 	filterButton: {
 		flexDirection: 'row', // <--- добавлено
