@@ -15,6 +15,7 @@ import TaskChatScreen from '../screens/TaskChatScreen'
 import { colors, navStyles, typography } from '../styles';
 import StatisticsScreen from '../screens/StatisticsScreen'
 import EmployeeProfileScreen from '../screens/EmployeeProfileScreen'
+import { ChangePasswordScreen } from '../screens/ChangePasswordScreen'
 
 
 
@@ -94,17 +95,25 @@ export default function AppNavigation() {
 					headerTintColor: colors.primary,
 					headerBackTitleVisible: false,
 					contentStyle: { backgroundColor: colors.white },
-				  }}
+				}}
 			>
 				<Stack.Screen name='Home' component={HomeScreen} />
 				<Stack.Screen name='Login' component={LoginScreen} />
+				<Stack.Screen name='ChangePassword' component={ChangePasswordScreen} />
 				<Stack.Screen name='Register' component={RegisterScreen} />
 				<Stack.Screen name='EmployerDashboard' component={EmployerTabs} />
 				<Stack.Screen name='EmployeeDashboard' component={EmployeeTabs} />
 				<Stack.Screen name='CreateTask' component={CreateTaskScreen} />
 				<Stack.Screen name='TaskDetails' component={TaskDetailsScreen} />
 				{/* <Stack.Screen name="Chat" component={ChatScreen} options={({ route }) => ({ title: route.params.recipientName || 'Чат',headerShown: true })}/> */}
-				<Stack.Screen name="TaskChat" component={TaskChatScreen}options={({ route }) => ({ title: `Чат по задаче #${route.params.taskId.substring(0, 6)}`,headerShown: true})}/>
+				<Stack.Screen
+					name='TaskChat'
+					component={TaskChatScreen}
+					options={({ route }) => ({
+						title: `Чат по задаче #${route.params.taskId.substring(0, 6)}`,
+						headerShown: true,
+					})}
+				/>
 			</Stack.Navigator>
 		</NavigationContainer>
 	)
