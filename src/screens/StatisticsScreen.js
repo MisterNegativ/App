@@ -58,7 +58,10 @@ if (task.status === 'completed' && task.employeeId) {
 
 
 
+<<<<<<< HEAD
 			// Просроченные
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 			const deadline = task.deadline?.toDate?.()
 			if (deadline && task.status !== 'completed' && deadline < now) {
 				overdue++

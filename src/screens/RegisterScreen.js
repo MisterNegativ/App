@@ -29,19 +29,28 @@ export default function RegisterScreen({ navigation }) {
 			return
 		}
 
+<<<<<<< HEAD
 		// Добавьте в начало handleRegister
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		if (!/^\+?\d{10,15}$/.test(phone)) {
 			Alert.alert('Ошибка', 'Введите корректный номер телефона')
 			return
 		}
 
+<<<<<<< HEAD
 		// Простая валидация email
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		if (!/^\S+@\S+\.\S+$/.test(email)) {
 			Alert.alert('Ошибка', 'Введите корректный email')
 			return
 		}
 
+<<<<<<< HEAD
 		// Валидация пароля (минимум 6 символов)
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		if (password.length < 6) {
 			Alert.alert('Ошибка', 'Пароль должен содержать минимум 6 символов')
 			return
@@ -59,17 +68,27 @@ export default function RegisterScreen({ navigation }) {
 				displayName: `${firstName} ${lastName}`,
 			})
 
+<<<<<<< HEAD
 			// Сохраняем тип пользователя в Firestore
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 			await setDoc(doc(db, 'users', userCredential.user.uid), {
 				firstName,
 				lastName,
 				phone,
 				email,
+<<<<<<< HEAD
 				userType, // 'employee' или 'employer'
 				createdAt: new Date().toISOString(),
 			})
 
 			// Убираем Alert перед навигацией, так как сразу переходим на другой экран
+=======
+				userType, 
+				createdAt: new Date().toISOString(),
+			})
+
+>>>>>>> d06e9d4 (Bugs fixes)
 			navigation.replace(
 				userType === 'employer' ? 'EmployerDashboard' : 'EmployeeDashboard'
 			)

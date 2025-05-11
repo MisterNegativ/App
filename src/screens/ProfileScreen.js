@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // ProfileScreen.js
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 import React, { useState, useEffect } from 'react'
 import {
 	View,
@@ -34,7 +37,10 @@ export default function ProfileScreen() {
 	const [averageRating, setAverageRating] = useState('0.0')
 
 	useEffect(() => {
+<<<<<<< HEAD
 		// Fetch user role from 'users' collection
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		const fetchRole = async () => {
 			try {
 				const db = getFirestore()
@@ -52,7 +58,10 @@ export default function ProfileScreen() {
 	}, [])
 
 	useEffect(() => {
+<<<<<<< HEAD
 		// Fetch average rating only for employees
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		if (userRole !== 'employee') {
 			setRatingLoading(false)
 			return

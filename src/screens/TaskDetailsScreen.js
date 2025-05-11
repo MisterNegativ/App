@@ -58,7 +58,11 @@ const rateTask = async value => {
 			action: 'RATED',
 			userId: auth.currentUser.uid,
 			value,
+<<<<<<< HEAD
 			timestamp: new Date().toISOString(), // заменили serverTimestamp()
+=======
+			timestamp: new Date().toISOString(), 
+>>>>>>> d06e9d4 (Bugs fixes)
 		}
 
 		await updateDoc(doc(db, 'tasks', taskId), {
@@ -100,7 +104,10 @@ const rateTask = async value => {
 
 		console.log('Загрузка изображения в Cloudinary...')
 		try {
+<<<<<<< HEAD
 			// Получаем информацию о файле
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 			const fileInfo = await FileSystem.getInfoAsync(imageUri)
 			const imageSize = fileInfo.size || 0
 			console.log('Размер файла:', imageSize)
@@ -110,12 +117,16 @@ const rateTask = async value => {
 				return null
 			}
 
+<<<<<<< HEAD
 			// Получаем blob для изображения с помощью fetch
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 			const response = await fetch(imageUri)
 			const blob = await response.blob()
 
 			console.log('Тип blob-а:', blob.type)
 
+<<<<<<< HEAD
 			// Формируем данные для отправки в Cloudinary
 			const formData = new FormData()
 			formData.append('file', {
@@ -127,6 +138,17 @@ const rateTask = async value => {
 			formData.append('cloud_name', 'dofzhqjwv') // Твой cloud_name
 
 			// Отправка данных на сервер Cloudinary
+=======
+			const formData = new FormData()
+			formData.append('file', {
+				uri: imageUri,
+				type: blob.type || 'image/jpeg',
+				name: `image_${Date.now()}.jpg`,
+			})
+			formData.append('upload_preset', 'unsigned_preset') 
+			formData.append('cloud_name', 'dofzhqjwv') // 
+
+>>>>>>> d06e9d4 (Bugs fixes)
 			const uploadResponse = await fetch(
 				'https://api.cloudinary.com/v1_1/dofzhqjwv/image/upload',
 				{
@@ -139,7 +161,11 @@ const rateTask = async value => {
 			console.log('Изображение загружено:', result.secure_url)
 
 			if (result.secure_url) {
+<<<<<<< HEAD
 				return result.secure_url // URL загруженного изображения
+=======
+				return result.secure_url 
+>>>>>>> d06e9d4 (Bugs fixes)
 			} else {
 				throw new Error('Ошибка загрузки изображения')
 			}
@@ -177,7 +203,10 @@ const rateTask = async value => {
 				if (!imageUrl) return
 			}
 
+<<<<<<< HEAD
 			// Создаём историю вручную с ISO-датой вместо serverTimestamp()
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 			const historyEntry = {
 				action: TaskAction.STATUS_CHANGED,
 				status: newStatus,
@@ -195,7 +224,11 @@ const rateTask = async value => {
 			}
 
 			if (newStatus === TaskStatus.IN_PROGRESS) {
+<<<<<<< HEAD
 				updateData.completedAt = serverTimestamp() // корректное использование
+=======
+				updateData.completedAt = serverTimestamp()  
+>>>>>>> d06e9d4 (Bugs fixes)
 				updateData.employeeProof = imageUrl
 			}
 
@@ -536,23 +569,37 @@ const styles = StyleSheet.create({
 	disabledButton: {
 		opacity: 0.6,
 	},
+<<<<<<< HEAD
 	// styles.button
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 	button: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: '#6200EE',
+<<<<<<< HEAD
 		paddingVertical: 10, // чуть ниже
 		paddingHorizontal: 12, // чуть меньше
 		borderRadius: 8, // чуть меньше
 		margin: 4, // отступ между кнопками
 		minWidth: 140, // минимальная ширина
 		// тень (iOS)
+=======
+		paddingVertical: 10, 
+		paddingHorizontal: 12, 
+		borderRadius: 8, 
+		margin: 4, 
+		minWidth: 140, 
+>>>>>>> d06e9d4 (Bugs fixes)
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.2,
 		shadowRadius: 3,
+<<<<<<< HEAD
 		// тень (Android)
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 		elevation: 4,
 	},
 	buttonDisabled: {
@@ -560,7 +607,11 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		color: '#fff',
+<<<<<<< HEAD
 		fontSize: 14, // чуть меньше
+=======
+		fontSize: 14, 
+>>>>>>> d06e9d4 (Bugs fixes)
 		fontWeight: '600',
 		marginLeft: 6,
 	},

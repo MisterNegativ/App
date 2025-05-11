@@ -19,7 +19,10 @@ export default function EmployerDashboard({ navigation }) {
 	const [selectedStatus, setSelectedStatus] = useState('Все')
 	const [loading, setLoading] = useState(true)
 
+<<<<<<< HEAD
 	// Отображаемые названия статусов
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 	const statusLabels = {
 		open: 'Открыта',
 		in_progress: 'В работе',
@@ -27,6 +30,7 @@ export default function EmployerDashboard({ navigation }) {
 		completed: 'Завершена',
 	}
 
+<<<<<<< HEAD
 		// Передаём теперь и статус
 		const getBorderColorByDeadline = (deadline, status) => {
 			// Если задача завершена — сразу зелёный
@@ -35,17 +39,33 @@ export default function EmployerDashboard({ navigation }) {
 			}
 	
 			if (!deadline) return '#007AFF' // синий по умолчанию
+=======
+		const getBorderColorByDeadline = (deadline, status) => {
+			if (status === TaskStatus.COMPLETED) {
+				return '#388E3C' 
+			}
+	
+			if (!deadline) return '#007AFF' 
+>>>>>>> d06e9d4 (Bugs fixes)
 	
 			const now = new Date()
 			const diffMs = deadline.toDate() - now
 			const diffHours = diffMs / (1000 * 60 * 60)
 	
 			if (diffHours <= 1) {
+<<<<<<< HEAD
 				return '#D32F2F' // красный
 			} else if (diffHours <= 24) {
 				return '#FF8F00' // оранжевый
 			} else {
 				return '#007AFF' // синий
+=======
+				return '#D32F2F'
+			} else if (diffHours <= 24) {
+				return '#FF8F00' 
+			} else {
+				return '#007AFF' 
+>>>>>>> d06e9d4 (Bugs fixes)
 			}
 		}
 
@@ -139,7 +159,10 @@ export default function EmployerDashboard({ navigation }) {
 				data={filteredTasks}
 				ListEmptyComponent={<Text>Задачи не найдены</Text>}
 				renderItem={({ item }) => (
+<<<<<<< HEAD
 					// Внутри renderItem:
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 					<TouchableOpacity
 						style={[
 							styles.taskCard,
@@ -244,7 +267,11 @@ const styles = StyleSheet.create({
 		marginRight: 10,
 		backgroundColor: '#eee',
 		borderRadius: 20,
+<<<<<<< HEAD
 		justifyContent: 'center', // Для выравнивания текста по центру
+=======
+		justifyContent: 'center',  
+>>>>>>> d06e9d4 (Bugs fixes)
 	},
 	activeFilterButton: {
 		backgroundColor: '#007AFF',

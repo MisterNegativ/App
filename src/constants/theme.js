@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // src/constants/theme.js
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 const theme = {
   colors: {
     primary: '#3498db',
@@ -44,6 +47,9 @@ const theme = {
   },
 };
 
+<<<<<<< HEAD
 // Экспортируем как именованную и default константу
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 export { theme };
 export default theme;

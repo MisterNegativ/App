@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 // navigation/index.js
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { NavigationContainer } from '@react-navigation/native'
@@ -22,7 +25,10 @@ import { ChangePasswordScreen } from '../screens/ChangePasswordScreen'
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 
+<<<<<<< HEAD
 // Создаем Tab Navigator для Employer
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 function EmployerTabs() {
 	return (
 		<Tab.Navigator
@@ -56,7 +62,10 @@ function EmployerTabs() {
 }
 
 
+<<<<<<< HEAD
 // Создаем Tab Navigator для Employee
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 function EmployeeTabs() {
 	return (
 		<Tab.Navigator

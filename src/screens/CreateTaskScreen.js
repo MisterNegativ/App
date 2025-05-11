@@ -17,17 +17,29 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
+<<<<<<< HEAD
 // Define custom blue theme for Paper
+=======
+>>>>>>> d06e9d4 (Bugs fixes)
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
+<<<<<<< HEAD
     primary: '#3B82F6',    // blue-500
     accent: '#60A5FA',     // blue-300
     background: '#F2F2F2',
     surface: '#FFFFFF',
     placeholder: '#6B7280', // gray-500
     text: '#111827',       // gray-900
+=======
+    primary: '#3B82F6',    
+    accent: '#60A5FA',     
+    background: '#F2F2F2',
+    surface: '#FFFFFF',
+    placeholder: '#6B7280', 
+    text: '#111827',      
+>>>>>>> d06e9d4 (Bugs fixes)
   },
 };
 
