@@ -24,6 +24,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { TaskStatus, TaskAction } from '../../models';
+import * as FileSystem from 'expo-file-system';
 
 
 export default function TaskDetailsScreen({ route, navigation }) {
@@ -94,30 +95,63 @@ const rateTask = async value => {
     }
   };
 
-  const uploadImage = async () => {
-    if (!image) return null;
+  const uploadToCloudinary = async (imageUri, taskId) => {
+		if (!imageUri) return null
 
-    setUploading(true);
-    try {
-      const response = await fetch(image);
-      const blob = await response.blob();
-      if (!storage) {
-        throw new Error('Storage не инициализирован');
-      }
-      const storageRef = ref(storage, `task-proofs/${taskId}/${Date.now()}`);
-      const snapshot = await uploadBytes(storageRef, blob);
-      if (!snapshot.ref) {
-        throw new Error('Не удалось получить ссылку на загруженный файл');
-      }
-      return await getDownloadURL(snapshot.ref);
-    } catch (error) {
-      console.error('Upload error:', error);
-      Alert.alert('Ошибка', 'Не удалось загрузить изображение');
-      return null;
-    } finally {
-      setUploading(false);
-    }
-  };
+		console.log('Загрузка изображения в Cloudinary...')
+		try {
+			// Получаем информацию о файле
+			const fileInfo = await FileSystem.getInfoAsync(imageUri)
+			const imageSize = fileInfo.size || 0
+			console.log('Размер файла:', imageSize)
+
+			if (imageSize > 5 * 1024 * 1024) {
+				Alert.alert('Ошибка', 'Файл слишком большой. Максимальный размер: 5MB')
+				return null
+			}
+
+			// Получаем blob для изображения с помощью fetch
+			const response = await fetch(imageUri)
+			const blob = await response.blob()
+
+			console.log('Тип blob-а:', blob.type)
+
+			// Формируем данные для отправки в Cloudinary
+			const formData = new FormData()
+			formData.append('file', {
+				uri: imageUri,
+				type: blob.type || 'image/jpeg', // Убедись, что правильно указываешь тип
+				name: `image_${Date.now()}.jpg`,
+			})
+			formData.append('upload_preset', 'unsigned_preset') // Название твоего preset
+			formData.append('cloud_name', 'dofzhqjwv') // Твой cloud_name
+
+			// Отправка данных на сервер Cloudinary
+			const uploadResponse = await fetch(
+				'https://api.cloudinary.com/v1_1/dofzhqjwv/image/upload',
+				{
+					method: 'POST',
+					body: formData,
+				}
+			)
+
+			const result = await uploadResponse.json()
+			console.log('Изображение загружено:', result.secure_url)
+
+			if (result.secure_url) {
+				return result.secure_url // URL загруженного изображения
+			} else {
+				throw new Error('Ошибка загрузки изображения')
+			}
+		} catch (error) {
+			console.log('Ошибка загрузки на Cloudinary:', error)
+			Alert.alert('Ошибка', 'Не удалось загрузить изображение')
+			return null
+		}
+	}
+
+  
+  
 
   const openChat = () => {
     navigation.navigate('TaskChat', { 
@@ -133,13 +167,13 @@ const rateTask = async value => {
 		try {
 			let imageUrl = null
 
-			if (newStatus === TaskStatus.COMPLETED) {
+			if (newStatus === TaskStatus.IN_PROGRESS) {
 				if (!image) {
 					Alert.alert('Требуется фото', 'Сделайте фото выполненной работы')
 					return
 				}
 
-				imageUrl = await uploadImage()
+				imageUrl = await uploadToCloudinary(image, taskId)
 				if (!imageUrl) return
 			}
 
@@ -160,14 +194,14 @@ const rateTask = async value => {
 				history: arrayUnion(historyEntry),
 			}
 
-			if (newStatus === TaskStatus.COMPLETED) {
+			if (newStatus === TaskStatus.IN_PROGRESS) {
 				updateData.completedAt = serverTimestamp() // корректное использование
 				updateData.employeeProof = imageUrl
 			}
 
 			await updateDoc(doc(db, 'tasks', taskId), updateData)
 
-			if (newStatus === TaskStatus.COMPLETED) {
+			if (newStatus === TaskStatus.IN_PROGRESS) {
 				Alert.alert('Успех', 'Задача завершена')
 				setImage(null)
 			}
@@ -176,6 +210,28 @@ const rateTask = async value => {
 			Alert.alert('Ошибка', error.message)
 		}
 	}
+
+	const confirmCompletion = async () => {
+		try {
+			const updateData = {
+				status: 'completed',
+				history: arrayUnion({
+					action: 'employer_confirmed_completion',
+					status: 'completed',
+					userId: auth.currentUser.uid,
+					timestamp: new Date().toISOString(),
+				}),
+				completedAt: serverTimestamp(),
+			}
+
+			await updateDoc(doc(db, 'tasks', task.id), updateData)
+			Alert.alert('Готово', 'Вы подтвердили завершение задачи')
+		} catch (error) {
+			console.error('Ошибка подтверждения:', error)
+			Alert.alert('Ошибка', error.message)
+		}
+	}
+	  
 
 
   const getStatusText = status => {
@@ -266,6 +322,14 @@ const rateTask = async value => {
 			)}
 
 			{auth.currentUser?.uid === task.employerId &&
+				task.status === 'in_progress' && (
+					<TouchableOpacity style={styles.button} onPress={confirmCompletion}>
+						<Ionicons name='checkmark-circle-outline' size={20} color='#fff' />
+						<Text style={styles.buttonText}>ПОДТВЕРДИТЬ ЗАВЕРШЕНИЕ</Text>
+					</TouchableOpacity>
+				)}
+
+			{auth.currentUser?.uid === task.employerId &&
 				task.status === 'completed' &&
 				task.rating == null && (
 					<View style={styles.ratingContainer}>
@@ -299,35 +363,36 @@ const rateTask = async value => {
 				</View>
 			)}
 
-			{(auth.currentUser?.uid === task.employeeId && task.status != TaskStatus.COMPLETED) && (
-				<View style={styles.actions}>
-					{task.status !== TaskStatus.BLOCKED && (
-						<TouchableOpacity style={styles.button}>
-							<Ionicons name='alert-circle-outline' size={20} color='#fff' />
-							<Text style={styles.buttonText}>Возникли проблемы</Text>
+			{auth.currentUser?.uid === task.employeeId &&
+				task.status != TaskStatus.IN_PROGRESS && (
+					<View style={styles.actions}>
+						{task.status !== TaskStatus.BLOCKED && (
+							<TouchableOpacity style={styles.button}>
+								<Ionicons name='alert-circle-outline' size={20} color='#fff' />
+								<Text style={styles.buttonText}>Возникли проблемы</Text>
+							</TouchableOpacity>
+						)}
+
+						<TouchableOpacity style={styles.button} onPress={pickImage}>
+							<Ionicons name='camera-outline' size={20} color='#fff' />
+							<Text style={styles.buttonText}>Сделать фото работы</Text>
 						</TouchableOpacity>
-					)}
 
-					<TouchableOpacity style={styles.button} onPress={pickImage}>
-						<Ionicons name='camera-outline' size={20} color='#fff' />
-						<Text style={styles.buttonText}>Сделать фото работы</Text>
-					</TouchableOpacity>
-
-					<TouchableOpacity
-						style={[
-							styles.button,
-							(!image || uploading) && styles.buttonDisabled,
-						]}
-						onPress={() => updateStatus(TaskStatus.COMPLETED)}
-						disabled={!image || uploading}
-					>
-						<Ionicons name='checkmark-done-outline' size={20} color='#fff' />
-						<Text style={styles.buttonText}>
-							{uploading ? 'Отправка...' : 'Завершить задачу'}
-						</Text>
-					</TouchableOpacity>
-				</View>
-			)}
+						<TouchableOpacity
+							style={[
+								styles.button,
+								(!image || uploading) && styles.buttonDisabled,
+							]}
+							onPress={() => updateStatus(TaskStatus.IN_PROGRESS)}
+							disabled={!image || uploading}
+						>
+							<Ionicons name='checkmark-done-outline' size={20} color='#fff' />
+							<Text style={styles.buttonText}>
+								{uploading ? 'Отправка...' : 'Завершить задачу'}
+							</Text>
+						</TouchableOpacity>
+					</View>
+				)}
 
 			<TouchableOpacity style={styles.button} onPress={openChat}>
 				<Ionicons name='chatbubble-ellipses-outline' size={20} color='#fff' />
