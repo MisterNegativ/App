@@ -21,19 +21,6 @@ export default function EmployeeDashboard({ navigation }) {
 		open: 'Открыта',
 		in_progress: 'В работе',
 		blocked: 'Проблема',
-<<<<<<< HEAD
-		completed: 'Завершено', // ← добавлено
-	}
-
-	// Передаём теперь и статус
-	const getBorderColorByDeadline = (deadline, status) => {
-		// Если задача завершена — сразу зелёный
-		if (status === TaskStatus.COMPLETED) {
-			return '#388E3C' // зелёный
-		}
-
-		if (!deadline) return '#007AFF' // синий по умолчанию
-=======
 		completed: 'Завершено', 
 	}
 
@@ -43,26 +30,17 @@ export default function EmployeeDashboard({ navigation }) {
 		}
 
 		if (!deadline) return '#007AFF' 
->>>>>>> d06e9d4 (Bugs fixes)
 
 		const now = new Date()
 		const diffMs = deadline.toDate() - now
 		const diffHours = diffMs / (1000 * 60 * 60)
 
 		if (diffHours <= 1) {
-<<<<<<< HEAD
-			return '#D32F2F' // красный
-		} else if (diffHours <= 24) {
-			return '#FF8F00' // оранжевый
-		} else {
-			return '#007AFF' // синий
-=======
 			return '#D32F2F' 
 		} else if (diffHours <= 24) {
 			return '#FF8F00'
 		} else {
 			return '#007AFF' 
->>>>>>> d06e9d4 (Bugs fixes)
 		}
 	}
 
@@ -71,11 +49,7 @@ export default function EmployeeDashboard({ navigation }) {
 		{ value: 'open', label: 'Открыта', icon: 'folder-open-outline' },
 		{ value: 'in_progress', label: 'В работе', icon: 'time-outline' },
 		{ value: 'blocked', label: 'Проблема', icon: 'alert-circle-outline' },
-<<<<<<< HEAD
-		{ value: 'completed', label: 'Завершено', icon: 'checkmark-done-outline' }, // ← добавлено
-=======
 		{ value: 'completed', label: 'Завершено', icon: 'checkmark-done-outline' },
->>>>>>> d06e9d4 (Bugs fixes)
 	]
 
 	useEffect(() => {
@@ -151,10 +125,6 @@ export default function EmployeeDashboard({ navigation }) {
 				data={filteredTasks}
 				ListEmptyComponent={<Text>Задачи не найдены</Text>}
 				renderItem={({ item }) => (
-<<<<<<< HEAD
-					// Внутри renderItem:
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 					<TouchableOpacity
 						style={[
 							styles.taskCard,
@@ -254,11 +224,7 @@ const styles = StyleSheet.create({
 
 	filterContainer: { flexDirection: 'row', marginBottom: 20 },
 	filterButton: {
-<<<<<<< HEAD
-		flexDirection: 'row', // <--- добавлено
-=======
 		flexDirection: 'row',  
->>>>>>> d06e9d4 (Bugs fixes)
 		alignItems: 'center',
 		paddingVertical: 10,
 		paddingHorizontal: 15,

@@ -17,29 +17,16 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TaskStatus, TaskAction, TaskStructure } from "../../models";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-<<<<<<< HEAD
-// Define custom blue theme for Paper
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-<<<<<<< HEAD
-    primary: '#3B82F6',    // blue-500
-    accent: '#60A5FA',     // blue-300
-    background: '#F2F2F2',
-    surface: '#FFFFFF',
-    placeholder: '#6B7280', // gray-500
-    text: '#111827',       // gray-900
-=======
     primary: '#3B82F6',    
     accent: '#60A5FA',     
     background: '#F2F2F2',
     surface: '#FFFFFF',
     placeholder: '#6B7280', 
     text: '#111827',      
->>>>>>> d06e9d4 (Bugs fixes)
   },
 };
 
@@ -100,19 +87,29 @@ export default function CreateTaskScreen({ navigation }) {
       const userData = userDocSnap.data();
       const imageUrls = await Promise.all(images.map(uri => uploadImage(uri)));
       const taskData = {
-        ...task,
-        startDate: serverTimestamp(),
-        deadline: serverTimestamp(),
-        status: TaskStatus.OPEN,
-        employerId: auth.currentUser.uid,
-        employeeId: selectedEmployee?.id,
-        employeeName: selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : null,
-        createdAt: serverTimestamp(),
-        images: imageUrls,
-        history: [{ action: TaskAction.CREATED, userId: auth.currentUser.uid, timestamp: new Date().toISOString() }],
-        employerPhone: userData.phone || 'Нет номера',
-        employerName: auth.currentUser.displayName || `${userData.firstName} ${userData.lastName}`,
-      };
+				...task,
+				startDate: serverTimestamp(),
+				deadline: deadline,
+				status: TaskStatus.OPEN,
+				employerId: auth.currentUser.uid,
+				employeeId: selectedEmployee?.id,
+				employeeName: selectedEmployee
+					? `${selectedEmployee.firstName} ${selectedEmployee.lastName}`
+					: null,
+				createdAt: serverTimestamp(),
+				images: imageUrls,
+				history: [
+					{
+						action: TaskAction.CREATED,
+						userId: auth.currentUser.uid,
+						timestamp: new Date().toISOString(),
+					},
+				],
+				employerPhone: userData.phone || 'Нет номера',
+				employerName:
+					auth.currentUser.displayName ||
+					`${userData.firstName} ${userData.lastName}`,
+			}
       await setDoc(doc(db, 'tasks', Date.now().toString()), taskData);
       Alert.alert('Успех', 'Задача создана');
       navigation.goBack();
@@ -182,7 +179,7 @@ export default function CreateTaskScreen({ navigation }) {
                     icon="close"
                     compact
                     mode="contained"
-                    onPress={() => setImages(images.filter((_, i) => i !== idx))}                  style={styles.removeButton}
+                    onPress={() => setImages(images.filter((_, i) => i !== idx))} style={styles.removeButton}
                     color={theme.colors.accent}
                   />
                 </View>

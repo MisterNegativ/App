@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-// ProfileScreen.js
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 import React, { useState, useEffect } from 'react'
 import {
 	View,
@@ -37,10 +33,6 @@ export default function ProfileScreen() {
 	const [averageRating, setAverageRating] = useState('0.0')
 
 	useEffect(() => {
-<<<<<<< HEAD
-		// Fetch user role from 'users' collection
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 		const fetchRole = async () => {
 			try {
 				const db = getFirestore()
@@ -58,10 +50,6 @@ export default function ProfileScreen() {
 	}, [])
 
 	useEffect(() => {
-<<<<<<< HEAD
-		// Fetch average rating only for employees
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 		if (userRole !== 'employee') {
 			setRatingLoading(false)
 			return
@@ -213,7 +201,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-	container: { padding: 20, backgroundColor: '#f5f5f5' },
+	container: { padding: 20, backgroundColor: '#f5f5f5', marginTop:100 },
 	loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 	profileInfo: { alignItems: 'center', marginBottom: 20 },
 	avatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 20 },

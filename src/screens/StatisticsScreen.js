@@ -39,29 +39,25 @@ const StatisticsScreen = () => {
 		snapshot.forEach(doc => {
 			const task = doc.data()
 
-if (task.status === 'completed' && task.employeeId) {
-	const name = task.employeeName || 'Неизвестный'
-	stats[name] = (stats[name] || 0) + 1
+			if (task.status === 'completed' && task.employeeId) {
+				const name = task.employeeName || 'Неизвестный'
+				stats[name] = (stats[name] || 0) + 1
 
-	const completedDate = task.completedAt?.toDate?.()
-	const deadline = task.deadline?.toDate?.()
+				const completedDate = task.completedAt?.toDate?.()
+				const deadline = task.deadline?.toDate?.()
 
-	if (completedDate && deadline && completedDate > deadline) {
-		lateCompletedStats[name] = (lateCompletedStats[name] || 0) + 1
-	}
+				if (completedDate && deadline && completedDate > deadline) {
+					lateCompletedStats[name] = (lateCompletedStats[name] || 0) + 1
+				}
 
-	if (completedDate) {
-		const key = `${completedDate.getFullYear()}-${completedDate.getMonth() + 1}`
-		monthly[key] = (monthly[key] || 0) + 1
-	}
-}
+				if (completedDate) {
+					const key = `${completedDate.getFullYear()}-${completedDate.getMonth() + 1}`
+					monthly[key] = (monthly[key] || 0) + 1
+				}
+			}
 
 
 
-<<<<<<< HEAD
-			// Просроченные
-=======
->>>>>>> d06e9d4 (Bugs fixes)
 			const deadline = task.deadline?.toDate?.()
 			if (deadline && task.status !== 'completed' && deadline < now) {
 				overdue++
