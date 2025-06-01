@@ -13,7 +13,6 @@ import ProfileScreen from '../screens/ProfileScreen'
 import TaskChatScreen from '../screens/TaskChatScreen'
 import { colors, navStyles, typography } from '../styles';
 import StatisticsScreen from '../screens/StatisticsScreen'
-import EmployeeProfileScreen from '../screens/EmployeeProfileScreen'
 import { ChangePasswordScreen } from '../screens/ChangePasswordScreen'
 
 
